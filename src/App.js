@@ -15,7 +15,7 @@ import FacultyForm from "./FacultyForm";
 
 function App() {
   return (
-    <BrowserRouter basename="/facultyProfiling">
+    <BrowserRouter basename="/faculty-profiling">
       <Routes>
         <Route path="/" element={<FacultyDashboard />} />
         <Route path="/departments" element={<Departments />} />
