@@ -12,17 +12,28 @@ const generatePassword = () => {
   return password;
 };
 
-const Signup = () => {
-  const [loginType, setLoginType] = useState("faculty"); // faculty or higherAuthority
+const validatePassword = (password) => {
+  const lengthCheck = password.length >= 8;
+  const upperCheck = /[A-Z]/.test(password);
+  const lowerCheck = /[a-z]/.test(password);
+  const numberCheck = /[0-9]/.test(password);
+  const specialCheck = /[@#$!]/.test(password);
+  return lengthCheck && upperCheck && lowerCheck && numberCheck && specialCheck;
+};
+
+const SignupPage = () => {
+  const navigate = useNavigate();
+  const [userType, setUserType] = useState("faculty");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [department, setDepartment] = useState(""); // New field
+  const [department, setDepartment] = useState("");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
   const [passwordMatch, setPasswordMatch] = useState(true);
-  const navigate = useNavigate();
+  const [passwordValid, setPasswordValid] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (name && email) {
@@ -34,61 +45,93 @@ const Signup = () => {
 
   useEffect(() => {
     setPasswordMatch(password1 === password2);
+    setPasswordValid(validatePassword(password1));
   }, [password1, password2]);
 
-  const handleSignup = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!passwordMatch) return;
 
-    console.log("Signing up:", {
+    if (!passwordValid) {
+      alert("Password does not meet criteria.");
+      return;
+    }
+
+    if (!passwordMatch) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    if (userType === "faculty" && !department.trim()) {
+      alert("Please enter your department.");
+      return;
+    }
+
+    const userData = {
       name,
       email,
-      department,
       password: password1,
-      loginType,
-    });
+      role: userType,
+      ...(userType === "faculty" && { department }),
+    };
 
-    // Replace with backend API integration as needed
-    navigate("/login");
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Signup successful! Redirecting...");
+        navigate("/login");
+      } else {
+        alert(data.error || "Signup failed.");
+      }
+    } catch (err) {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="signup-container">
-      <h2>{loginType === "faculty" ? "Faculty Sign Up" : "Higher Authority Sign Up"}</h2>
+      <h2>{userType === "faculty" ? "Faculty Sign Up" : "Higher Authority Sign Up"}</h2>
 
-      <div className="login-toggle">
-        <button 
-          className={loginType === "faculty" ? "active" : ""}
-          onClick={() => setLoginType("faculty")}
-        >
-          Faculty Sign Up
+      <div className="user-type-toggle">
+        <button className={userType === "faculty" ? "active" : ""} onClick={() => setUserType("faculty")}>
+          Faculty Signup
         </button>
-        <button 
-          className={loginType === "higherAuthority" ? "active" : ""}
-          onClick={() => setLoginType("higherAuthority")}
-        >
-          Higher Authority Sign Up
+        <button className={userType === "authority" ? "active" : ""} onClick={() => setUserType("authority")}>
+          Higher Authority Signup
         </button>
       </div>
 
-      <form onSubmit={handleSignup}>
-        <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required />
-
-        {loginType === "faculty" && (
-          <select value={department} onChange={(e) => setDepartment(e.target.value)} required>
-            <option value="">Select Department</option>
-            <option value="CSE">CSE</option>
-            <option value="IT">IT</option>
-            <option value="ECE">ECE</option>
-            <option value="EEE">EEE</option>
-            <option value="MECH">MECH</option>
-            <option value="CIVIL">CIVIL</option>
-            <option value="CHEM">CHEM</option>
-            <option value="BIO">BIO</option>
-            <option value="AI">AI</option>
-            <option value="ML">ML</option>
-          </select>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        {userType === "faculty" && (
+          <input
+            type="text"
+            placeholder="Department"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            required
+          />
         )}
 
         <div className="password-input">
@@ -117,14 +160,28 @@ const Signup = () => {
           </span>
         </div>
 
-        {!passwordMatch && <p className="error-text">Passwords do not match</p>}
+        {!passwordMatch && (
+          <p className="error-text">Passwords do not match</p>
+        )}
+        {!passwordValid && (
+          <p className="error-text">
+            Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+          </p>
+        )}
 
-        <button type="submit" disabled={!passwordMatch}>Sign Up</button>
+        <button type="submit" disabled={!passwordMatch || !passwordValid || loading}>
+          {loading ? "Submitting..." : "Submit"}
+        </button>
       </form>
 
-      <p>Already have an account? <a href="/login">Log In</a></p>
+      <p>
+        Already have an account?{" "}
+        <span className="signup-link" onClick={() => navigate("/login")}>
+          Log In
+        </span>
+      </p>
     </div>
   );
 };
 
-export default Signup;
+export default SignupPage;
