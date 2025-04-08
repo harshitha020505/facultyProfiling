@@ -11,7 +11,13 @@ const LoginPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     console.log(`Logging in as ${loginType} with`, email, password);
-    navigate("/dashboard"); // Redirect to dashboard after login
+    // navigate("/dashboard"); // Redirect to dashboard after login
+    // Navigate to different pages based on login type
+    if (loginType === "faculty") {
+      navigate("/facultyHome");
+    } else {
+      navigate("/higherAuthorityHome");
+    }
   };
 
   return (
