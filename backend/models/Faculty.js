@@ -9,7 +9,10 @@ const facultySchema = new mongoose.Schema({
     gender: { type: String, enum: ['Male', 'Female', 'Other'] },
     address: { type: String },
     profilePicture: { type: String },
-    department: { type: String, required: true },
+    role: { type: String, required: true, enum: ["faculty", "authority"] }, // Role is now required
+    
+    // ✅ Department is required ONLY for faculty
+    department: { type: String, required: function() { return this.role === "faculty"; } },
     
     education: [{
         degree: String,
@@ -76,6 +79,3 @@ const facultySchema = new mongoose.Schema({
 
 const Faculty = mongoose.model("Faculty", facultySchema);
 module.exports = Faculty;
-
-
-

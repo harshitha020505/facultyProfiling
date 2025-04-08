@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Faculty = require("../models/Faculty");  // Adjust the path if needed
+const Faculty = require("../models/Faculty"); // Ensure you import your Faculty model
 
 const {
     registerFaculty,
@@ -12,52 +12,68 @@ const {
     deleteFaculty,
     bulkUploadFaculty,
     getFacultyByDepartment
-} = require("../controllers/facultyController");  // Adjust the import as per your file structure
+} = require("../controllers/facultyController");
 
-// Register a new faculty
+// ✅ Register a new faculty
 router.post("/register", registerFaculty);
 
-// Login a faculty
+// ✅ Login a faculty
 router.post("/login", loginFaculty);
 
-// Get faculty by ID
+// ✅ Add new faculty
+router.post("/", async (req, res) => {
+    try {
+        const newFaculty = new Faculty(req.body);
+        await newFaculty.save();
+        res.status(201).json({ message: "Faculty added successfully", newFaculty });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ Get faculty by ID
 router.get("/:id", getFaculty);
 
-// Get all faculty
+// ✅ Get all faculty
 router.get("/", getAllFaculty);
 
-// Search for faculty by name
-router.get("/search", searchFaculty);
+// ✅ Search for faculty by name
+router.get("/search", async (req, res) => {
+    console.log("🔵 Faculty Search API hit!");
 
-// Update faculty details
+    try {
+        const { name } = req.query;
+        console.log(`📌 Searching for: ${name}`);
+
+        if (!name) {
+            console.log("❌ Missing name query parameter");
+            return res.status(400).json({ error: "Name is required" });
+        }
+
+        const faculties = await Faculty.find({ name: { $regex: name, $options: "i" } });
+
+        console.log(`✅ Faculty found: ${faculties.length} records`, faculties);
+        res.json(faculties);
+    } catch (error) {
+        console.error("❌ Error fetching faculty data:", error);
+        res.status(500).json({ error: "Error fetching faculty data" });
+    }
+});
+
+
+// ✅ Update faculty details
 router.put("/:id", updateFaculty);
 
-// Delete faculty
+// ✅ Delete faculty
 router.delete("/:id", deleteFaculty);
 
-// Bulk upload faculty (New route to handle JSON input)
+// ✅ Bulk upload faculty
 router.post("/bulk-upload", (req, res) => {
     console.log("Bulk upload route hit");  // Debugging log
     bulkUploadFaculty(req, res);
 });
 
-router.get("/department/:department", async (req, res) => {
-    try {
-        const { department } = req.params;
-        console.log("Requested department:", department);  // Debugging log
+// ✅ Get faculty by department
+router.get("/department/:department", getFacultyByDepartment);
 
-        const facultyList = await Faculty.find({ department: department });
-
-        if (facultyList.length === 0) {
-            return res.status(404).json({ message: "No faculty found in this department" });
-        }
-
-        res.json(facultyList);
-    } catch (error) {
-        console.error("Error fetching faculty by department:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-});
-
-
-module.exports = router;
+module.exports = router;  // ✅ Ensure you export correctly
