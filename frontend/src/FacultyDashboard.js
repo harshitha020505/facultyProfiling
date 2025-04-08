@@ -118,6 +118,16 @@ const FacultyDashboard = () => {
           ))}
         </ul>
       </section>
+      {/* 🔥 Most Sought After Faculty */}
+      <section className="box">
+        <h2>Most Sought After Faculty</h2>
+        <div className="card highlight">
+          <h3>{mostSought.name}</h3>
+          <p>{mostSought.field}</p>
+          <p>⭐ User Favorite - Viewed {mostSought.views} times</p>
+        </div>
+      </section>
+
 
       <section ref={sections.about} className="box">
         <h2>About Us</h2>
