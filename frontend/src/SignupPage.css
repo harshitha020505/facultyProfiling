@@ -6,9 +6,9 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(to right, #667eea, white);
   height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  /* display: flex; */
+  /* justify-content: center; */
+  /* align-items: center; */
 }
 
 .signup-container {
@@ -64,7 +64,7 @@ form input {
 }
 
 .password-input input {
-  width: 100%;
+  width: 100%;  
 }
 
 .password-input span {
@@ -110,4 +110,11 @@ button[disabled] {
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
+}
+/* Add this to index.css or SignupPage.css */
+.signup-wrapper {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

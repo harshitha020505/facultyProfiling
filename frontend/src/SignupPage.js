@@ -97,6 +97,7 @@ const SignupPage = () => {
   };
 
   return (
+    <div className="signup-wrapper">
     <div className="signup-container">
       <h2>{userType === "faculty" ? "Faculty Sign Up" : "Higher Authority Sign Up"}</h2>
 
@@ -180,6 +181,7 @@ const SignupPage = () => {
           Log In
         </span>
       </p>
+    </div>
     </div>
   );
 };
